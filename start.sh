@@ -8,7 +8,7 @@ fi
 
 # Activate the virtual environment and install the required packages
 source dsbootcamp/bin/activate
-pip install -r requirements.txt >> requirements.log 2>&1
+pip install -r requirements.txt >> logs/requirements.log 2>&1
 
 # Pull updates from Git repository
 echo "Pulling updates from Git repository..."
