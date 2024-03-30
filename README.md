@@ -50,6 +50,15 @@ The project is divided into the following directories:
 - `tests`: Contains the test cases used in the project. tba.
 - `notebooks`: Contains the Jupyter notebooks used in the project. tba.
 
+
+## Kanban Board
+
+We will be using a Kanban board to track the progress of the project. You can access the Kanban board using the following link:
+https://github.com/ebootehsaz/Analysis-and-Detection-of-PCOS/projects?query=is%3Aopen
+
+Think of the Kanban board as a to-do list. You can create issues, assign tasks, and track progress on the Kanban board. You can move tasks from one column to another as you complete them. You can also add labels, assignees, and due dates to tasks on the Kanban board. You can use the Kanban board to organize your work, prioritize tasks, and track progress on the project.
+
+
 ## Clone the Repository
 
 You can clone the repository using the following command:
