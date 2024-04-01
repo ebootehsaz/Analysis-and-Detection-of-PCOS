@@ -112,6 +112,43 @@ def save_data_csv(df:DataFrame , fp: str):
     except Exception as e:
         print(f"Error saving the data to {fp}. Error: {str(e)}")
 
+def display_data(df: DataFrame):
+    """
+    Generate tables/graphs to display the data.
+    """
+    # Display the data
+    print(f"Data in {df.attrs['file_path']}:", df.head())
+
+    # Display the data types
+    print(f"Data types in {df.attrs['file_path']}:", df.dtypes)
+
+    # Display the summary statistics
+    print(f"Summary statistics in {df.attrs['file_path']}:", df.describe())
+
+    # Display the missing values
+    print(f"Missing values in {df.attrs['file_path']}:", df.isnull().sum())
+
+    # Display the unique values in each column
+    for col in df.columns:
+        print(f"Unique values in {col}:", df[col].unique())
+
+    # Display the distribution of the data
+    for col in df.columns:
+        if df[col].dtype in ['int64', 'float64']:
+            sns.histplot(df[col])
+            plt.title(f"Distribution of {col}")
+            plt.show()
+
+    # Display the correlation between the columns
+    sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+    plt.title("Correlation between columns")
+    plt.show()
+
+    # Display the relationship between columns
+    sns.pairplot(df)
+    plt.title("Relationship between columns")
+    plt.show()
+
 def main():
     # Load the data
     PCOS_inf_df = load_data(PCOS_inf_filepath)
@@ -128,6 +165,11 @@ def main():
     save_data_csv(PCOS_df_merged, PCOS_merged_processed_filepath)
     save_data_csv(PCOS_woinf_df, PCOS_woinf_processed_filepath) 
     save_data_csv(PCOS_inf_df, PCOS_inf_processed_filepath)
+
+    # Display the data
+    # display_data(PCOS_df_merged)
+    display_data(PCOS_woinf_df)
+    display_data(PCOS_inf_df)
 
 if __name__ == '__main__':
     main()  
