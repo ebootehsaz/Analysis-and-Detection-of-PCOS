@@ -41,35 +41,6 @@ def load_data(filepath: str) -> DataFrame:
     
     return df
 
-def process_data(df: DataFrame) -> DataFrame:
-    # Checking column names, missing values, duplicates
-    print(f"Columns in {df.attrs['file_path']}:", df.columns)
-    print(f"Missing values in {df.attrs['file_path']}:\n{df.isnull().sum()}")
-    print(f"Duplicates in {df.attrs['file_path']}: {df.duplicated().sum()}")
-
-    #Dropping repeated/unnecessary columns
-    df = df.drop(['Unnamed: 44','Sl. No_wo', 'PCOS (Y/N)_wo', '  I   beta-HCG(mIU/mL)_wo','II    beta-HCG(mIU/mL)_wo', 'AMH(ng/mL)_wo'], axis=1, errors='ignore')
-
-    #Renaming column due to misspelling in original df
-    df.rename(columns={'Marraige Status (Yrs)': 'Marriage Status (Yrs)'}, inplace=True, errors='ignore')
-
-    # Fix column names - optional
-    df.columns = df.columns.str.strip() # .str.replace(' ', '_').str.lower()
-    df.columns = [re.sub(r'\s+', ' ', col).strip() for col in df.columns]
-
-
-    # Fix missing values
-    # TODO: Print out the unique values in each column and how many missing values are in each column
-    df = df.fillna('None')
-
-    # Drop duplicates
-    df = df.drop_duplicates()
-
-    # Take a random sample of the data
-    print(f"Sample of the data in {df.attrs['file_path']}:", df.sample(5))
-
-    return df
-
 def merge_data(df1: DataFrame, df2: DataFrame) -> DataFrame:
     """
     Merge two DataFrames.
