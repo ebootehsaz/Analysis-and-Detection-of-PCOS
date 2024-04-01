@@ -60,6 +60,8 @@ def process_data(df: DataFrame) -> DataFrame:
 
     # Fix missing values
     # TODO: Print out the unique values in each column and how many missing values are in each column
+    print('data bootcamp')
+    
     df = df.fillna('None')
 
     # Drop duplicates
