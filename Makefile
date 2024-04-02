@@ -1,1 +1,4 @@
-# Eventually we will add stuff for linting and testing here
+.PHONY: test
+
+test:
+	flake8 src/

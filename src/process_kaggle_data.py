@@ -1,45 +1,12 @@
 import re
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import os
 from pandas import DataFrame
 
+from constants import PCOS_inf_filepath, PCOS_woinf_filepath, \
+PCOS_inf_processed_filepath, PCOS_woinf_processed_filepath, PCOS_merged_processed_filepath
 
-# Path to the Kaggle data
-PCOS_inf_filepath = "../Kaggle_Data/PCOS_infertility.csv"
-PCOS_woinf_filepath, page = "../Kaggle_Data/PCOS_data_without_infertility.xlsx", "Full_new"
+from utils import load_data, merge_data, save_data_csv
 
-# Path to save the processed data
-PCOS_inf_processed_filepath = "../data/PCOS_infertility_processed.csv"
-PCOS_woinf_processed_filepath = "../data/PCOS_woinf_processed.csv"
-PCOS_merged_processed_filepath = "../data/PCOS_merged_processed.csv"
-
-# Load the data into a DataFrame
-def load_data(filepath: str) -> DataFrame:
-    """
-    Load data from a file path into a DataFrame.
-    Args:
-        filepath: str - file path to the data
-    Returns:
-        df - data loaded into a DataFrame
-    """
-    # Check if the file path exists
-    if not os.path.exists(filepath):
-        raise FileNotFoundError(f"File path {filepath} does not exist.")
-    
-    # They data is either in csv or excel format
-    if filepath.endswith('.csv'):
-        df = pd.read_csv(filepath)
-        df.attrs['file_path'] = filepath  # Storing file path as an attribute
-    elif filepath.endswith('.xlsx'):
-        df = pd.read_excel(filepath, sheet_name=page)
-        df.attrs['file_path'] = filepath  # Storing file path as an attribute
-    else:
-        raise ValueError(f"File path {filepath} is not a csv or excel file.")
-    
-    return df
+# This program defines utility functions to process and clean data.
 
 def process_data(df: DataFrame) -> DataFrame:
     # Checking column names, missing values, duplicates
@@ -57,10 +24,17 @@ def process_data(df: DataFrame) -> DataFrame:
     df.columns = df.columns.str.strip() # .str.replace(' ', '_').str.lower()
     df.columns = [re.sub(r'\s+', ' ', col).strip() for col in df.columns]
 
-
     # Fix missing values
-    # TODO: Print out the unique values in each column and how many missing values are in each column
-    print('data bootcamp')
+    # Print out the first 5 missing rows for each column with missing values
+    # Find rows with missing data across any column
+    rows_with_missing_data = df[df.isnull().any(axis=1)]
+
+    # Display the rows with missing data if any
+    if not rows_with_missing_data.empty:
+        print("Rows with missing data:")
+        print(rows_with_missing_data)
+    else:
+        print("No missing data in any row.")
     
     df = df.fillna('None')
 
@@ -72,82 +46,6 @@ def process_data(df: DataFrame) -> DataFrame:
 
     return df
 
-def merge_data(df1: DataFrame, df2: DataFrame) -> DataFrame:
-    """
-    Merge two DataFrames.
-    Args:
-        df1: DataFrame - first DataFrame to merge
-        df2: DataFrame - second DataFrame to merge
-    Returns:
-        DataFrame - merged DataFrame
-    """
-    # print(df1.columns)
-    # print(df2.columns)
-    df = pd.merge(df1, df2, on='Patient File No.', suffixes=('', '_wo'), how='left')
-
-    # remove columns if all rows of that column are NaN
-    df = df.dropna(axis=1, how='all')
-
-    return df
-
-
-def save_data_csv(df:DataFrame , fp: str):
-    """
-    Save the data to a csv file.
-    Args:
-        df: DataFrame - data to save to a csv file
-        fp: str - file path to save the data
-    """
-    # Check if the file path exists and prompt user to overwrite
-    if os.path.exists(fp):
-        overwrite = input(f"File path {fp} already exists. Do you want to overwrite it? (y/n): ")
-        if overwrite.lower() != 'y':
-            print("Data not saved.")
-            return
-
-    # Save the data
-    try:
-        df.to_csv(fp, index=False)
-        print(f"Data saved to {fp}")
-    except Exception as e:
-        print(f"Error saving the data to {fp}. Error: {str(e)}")
-
-def display_data(df: DataFrame):
-    """
-    Generate tables/graphs to display the data.
-    """
-    # Display the data
-    print(f"Data in {df.attrs['file_path']}:", df.head())
-
-    # Display the data types
-    print(f"Data types in {df.attrs['file_path']}:", df.dtypes)
-
-    # Display the summary statistics
-    print(f"Summary statistics in {df.attrs['file_path']}:", df.describe())
-
-    # Display the missing values
-    print(f"Missing values in {df.attrs['file_path']}:", df.isnull().sum())
-
-    # Display the unique values in each column
-    for col in df.columns:
-        print(f"Unique values in {col}:", df[col].unique())
-
-    # Display the distribution of the data
-    for col in df.columns:
-        if df[col].dtype in ['int64', 'float64']:
-            sns.histplot(df[col])
-            plt.title(f"Distribution of {col}")
-            plt.show()
-
-    # Display the correlation between the columns
-    sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
-    plt.title("Correlation between columns")
-    plt.show()
-
-    # Display the relationship between columns
-    sns.pairplot(df)
-    plt.title("Relationship between columns")
-    plt.show()
 
 def main():
     # Load the data
@@ -166,10 +64,6 @@ def main():
     save_data_csv(PCOS_woinf_df, PCOS_woinf_processed_filepath) 
     save_data_csv(PCOS_inf_df, PCOS_inf_processed_filepath)
 
-    # Display the data
-    # display_data(PCOS_df_merged)
-    display_data(PCOS_woinf_df)
-    display_data(PCOS_inf_df)
 
 if __name__ == '__main__':
     main()  
