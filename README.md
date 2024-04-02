@@ -21,20 +21,13 @@ We will analyze the dataset to identify patterns and trends. We will develop a m
 
 - Explore the PCOS dataset to understand its structure and features.
 - Identify missing values, outliers, and patterns in the data.
-    - we have identified ... 
 - Select relevant physical and clinical parameters for PCOS and infertility detection.
-    - we have selected ...
+    - Assessment of Ovarian Reserve: AMH (Anti-Müllerian Hormone) levels give insight into the ovarian reserve, which is crucial for fertility.
+    - Women with PCOS often have higher than normal AMH levels. This is because AMH is produced by the granulosa cells of ovarian follicles, and women with PCOS tend to have a higher number of small follicles in their ovaries.
 - Perform any necessary preprocessing steps, such as handling missing values or encoding categorical variables.
-    - we have handled ...
 - Choose appropriate machine learning models for binary classification (e.g., Logistic Regression)
-    - we have chosed to use....
-- Train the model on the training set and evaluate its performance on the testing set.
-    - we have...
-- Explore different classification metrics (accuracy, precision, recall, F1 score).
 - Formulate hypotheses related to PCOS and infertility based on the dataset.
-- Use appropriate statistical tests to test these hypotheses.
-- Create visualizations to support your findings and enhance the interpretability of the model.
-- Summarize your results, including key insights into physical and clinical parameters associated with PCOS and infertility.
+- Create visualizations to support your findings.
 
 - Generate tables/graphs to show the distribution of the target variable and key features.
 
