@@ -1,0 +1,21 @@
+name: Run Make Test
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
+    # - name: Install dependencies
+    #   run: |
+    #     make install  # Assuming you have a 'make install' command to set up dependencies
+    - name: Run tests
+      run: make test
