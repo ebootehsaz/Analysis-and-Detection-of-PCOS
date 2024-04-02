@@ -6,10 +6,11 @@ import seaborn as sns
 import os
 from pandas import DataFrame
 
-
 # Path to the Kaggle data
-PCOS_inf_filepath = "../Kaggle_Data/PCOS_infertility.csv"
-PCOS_woinf_filepath, page = "../Kaggle_Data/PCOS_data_without_infertility.xlsx", "Full_new"
+#PCOS_inf_filepath = "../Kaggle_Data/PCOS_infertility.csv"
+#PCOS_woinf_filepath, page = "../Kaggle_Data/PCOS_data_without_infertility.xlsx", "Full_new"
+PCOS_inf_filepath = "/Users/kaiyuanma/Desktop/Analysis-and-Detection-of-PCOS/Kaggle_Data/PCOS_infertility.csv"
+PCOS_woinf_filepath = "/Users/kaiyuanma/Desktop/Analysis-and-Detection-of-PCOS/Kaggle_Data/PCOS_data_without_infertility.xlsx"
 
 # Path to save the processed data
 PCOS_inf_processed_filepath = "../data/PCOS_infertility_processed.csv"
@@ -34,6 +35,7 @@ def load_data(filepath: str) -> DataFrame:
         df = pd.read_csv(filepath)
         df.attrs['file_path'] = filepath  # Storing file path as an attribute
     elif filepath.endswith('.xlsx'):
+        page = "Full_new"  # Or whatever the correct sheet name is
         df = pd.read_excel(filepath, sheet_name=page)
         df.attrs['file_path'] = filepath  # Storing file path as an attribute
     else:
@@ -60,6 +62,16 @@ def process_data(df: DataFrame) -> DataFrame:
 
     # Fix missing values
     # TODO: Print out the unique values in each column and how many missing values are in each column
+     # Print out the first 5 missing rows for each column with missing values
+    # Find rows with missing data across any column
+    rows_with_missing_data = df[df.isnull().any(axis=1)]
+    
+    # Display the rows with missing data if any
+    if not rows_with_missing_data.empty:
+        print("Rows with missing data:")
+        print(rows_with_missing_data)
+    else:
+        print("No missing data in any row.")
     print('data bootcamp')
     
     df = df.fillna('None')
@@ -90,27 +102,53 @@ def merge_data(df1: DataFrame, df2: DataFrame) -> DataFrame:
 
     return df
 
+# Visualize, identify, and remove outliers
+def visualize_and_remove_outliers(df: DataFrame, column: str):
+    sns.boxplot(x=df[column])
+    plt.title(f'Boxplot of {column} before outlier removal')
+    plt.show()
+    
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    df_filtered = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+    sns.boxplot(x=df_filtered[column])
+    plt.title(f'Boxplot of {column} after outlier removal')
+    plt.show()
+    return df_filtered
 
-def save_data_csv(df:DataFrame , fp: str):
+
+def save_data_csv(df: DataFrame, fp: str, overwrite: bool = False):
     """
     Save the data to a csv file.
     Args:
         df: DataFrame - data to save to a csv file
         fp: str - file path to save the data
+        overwrite: bool - whether to overwrite existing files without asking
     """
-    # Check if the file path exists and prompt user to overwrite
-    if os.path.exists(fp):
-        overwrite = input(f"File path {fp} already exists. Do you want to overwrite it? (y/n): ")
-        if overwrite.lower() != 'y':
-            print("Data not saved.")
-            return
+    if os.path.exists(fp) and not overwrite:
+        print(f"File path {fp} already exists. Data not saved to avoid overwriting.")
+        return
 
-    # Save the data
+    directory = os.path.dirname(fp)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Created directory {directory}")
+
     try:
         df.to_csv(fp, index=False)
         print(f"Data saved to {fp}")
     except Exception as e:
         print(f"Error saving the data to {fp}. Error: {str(e)}")
+
+def convert_to_numeric(df, column_names):
+    for column in column_names:
+        df[column] = pd.to_numeric(df[column], errors='coerce')
+    return df
+
 
 def display_data(df: DataFrame):
     """
@@ -152,24 +190,89 @@ def display_data(df: DataFrame):
 def main():
     # Load the data
     PCOS_inf_df = load_data(PCOS_inf_filepath)
+    original_inf_size = PCOS_inf_df.shape[0]
     PCOS_woinf_df = load_data(PCOS_woinf_filepath)
+    original_woinf_size = PCOS_woinf_df.shape[0]
 
     # Process the data
     PCOS_inf_df = process_data(PCOS_inf_df)
     PCOS_woinf_df = process_data(PCOS_woinf_df)
 
+    # Individual dataset processing, visualization, and removal of outliers
+    datasets = {
+        "PCOS_inf": (PCOS_inf_df, original_inf_size),
+        "PCOS_woinf": (PCOS_woinf_df, original_woinf_size)
+    }
+
+    for name, (df, original_size) in datasets.items():
+        numeric_columns = ['I beta-HCG(mIU/mL)', 'II beta-HCG(mIU/mL)', 'AMH(ng/mL)']
+        df = convert_to_numeric(df, numeric_columns)
+        for column in numeric_columns:
+            df = visualize_and_remove_outliers(df, column)
+        
+        new_size = df.shape[0]
+        rows_removed = original_size - new_size
+        percentage_removed = (rows_removed / original_size) * 100
+
+        print(f"{name} data size after removing outliers: {new_size} rows")
+        print(f"Number of rows removed due to outliers in {name}: {rows_removed}")
+        print(f"Percentage of data removed due to outliers in {name}: {percentage_removed:.2f}%")
+
+        # Generate pie chart for each dataset
+        labels = 'Remaining Data', 'Removed Data'
+        sizes = [100 - percentage_removed, percentage_removed]
+        colors = ['lightblue', 'lightcoral']
+        explode = (0.1, 0)  # explode the 1st slice (i.e., 'Remaining Data')
+        plt.figure(figsize=(7, 7))
+        plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
+                shadow=True, startangle=140)
+        plt.axis('equal')
+        plt.title(f'Percentage of Data Remaining vs. Removed Due to Outliers in {name}')
+        plt.show()
+
+        print(f"{name} data size after removing outliers: {new_size} rows")
+        print(f"Number of rows removed due to outliers in {name}: {rows_removed}")
+        print(f"Percentage of data removed due to outliers in {name}: {percentage_removed:.2f}%")
+
+
     # Merge the data
     PCOS_df_merged = merge_data(PCOS_inf_df, PCOS_woinf_df)
+    original_merged_size = PCOS_df_merged.shape[0]
+
+    # Convert specified columns to numeric in the merged dataset
+    PCOS_df_merged = convert_to_numeric(PCOS_df_merged, numeric_columns)
+    
+    # Visualize and remove outliers for the merged dataset
+    for column in numeric_columns:
+        PCOS_df_merged = visualize_and_remove_outliers(PCOS_df_merged, column)
+
+    new_merged_size = PCOS_df_merged.shape[0]
+    rows_removed_merged = original_merged_size - new_merged_size
+    percentage_removed_merged = (rows_removed_merged / original_merged_size) * 100
+
+    # Generate pie chart for the merged dataset
+    sizes_merged = [100 - percentage_removed_merged, percentage_removed_merged]
+    plt.figure(figsize=(7, 7))
+    plt.pie(sizes_merged, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
+            shadow=True, startangle=140)
+    plt.axis('equal')
+    plt.title('Percentage of Data Remaining vs. Removed Due to Outliers in Merged Dataset')
+    plt.show()
+
+    print(f"Merged dataset data size after removing outliers: {new_merged_size} rows")
+    print(f"Number of rows removed due to outliers in merged dataset: {rows_removed_merged}")
+    print(f"Percentage of data removed due to outliers in merged dataset: {percentage_removed_merged:.2f}%")
 
     # Save the processed data
-    save_data_csv(PCOS_df_merged, PCOS_merged_processed_filepath)
-    save_data_csv(PCOS_woinf_df, PCOS_woinf_processed_filepath) 
-    save_data_csv(PCOS_inf_df, PCOS_inf_processed_filepath)
+    save_data_csv(PCOS_df_merged, PCOS_merged_processed_filepath,overwrite=True)
+    save_data_csv(PCOS_woinf_df, PCOS_woinf_processed_filepath,overwrite=True) 
+    save_data_csv(PCOS_inf_df, PCOS_inf_processed_filepath,overwrite=True)
 
     # Display the data
     # display_data(PCOS_df_merged)
     display_data(PCOS_woinf_df)
     display_data(PCOS_inf_df)
+    display_data(PCOS_df_merged)
 
 if __name__ == '__main__':
     main()  
