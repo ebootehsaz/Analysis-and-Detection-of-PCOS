@@ -30,6 +30,40 @@ def fillna_median(df: DataFrame) -> DataFrame:
         df.loc[col_none, "None"] = df[col].median()
     return df
 
+
+def t_test(df: DataFrame):
+    """used to compare the means of two groups of data (fertile, infertile),
+    or columns with numerical data to find a significant difference
+    the smaller the t-score, the more similar the groups are"""
+    ...
+
+
+
+def chi_squared(df: DataFrame):
+    """ used to find the relatedness of two categorical variables, hypothesis testing
+    categorical columns: mostly the lifestyle and physical symptom ones
+    """
+    ...
+
+
+
+def risk_poisson_distribution(df: DataFrame):
+    """ once we are more confident on our data cleanup, use this to find high-risk patients
+    Def: more extensive than bionomial distribution that has finite samples
+    Requirements: independent, mutually-exclusive events, constant periods of time
+    Interpret: a discrete probability distribution of the probability of an event happening k times
+    """
+    ...
+
+
+def false_discovery_rate(df: DataFrame):
+    """ from Bayesian methods, FDR checks whether x% of identified significant features are truly null
+    FDR adjust p-val is usually 5% of all false positives or negatives run by tests
+    """
+    ...
+
+
+
 def main():
     # this is taken from visualize_data.py
     PCOS_inf_df = load_data(PCOS_inf_filepath)
@@ -70,3 +104,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# what's wrong with the heatmap sigh
