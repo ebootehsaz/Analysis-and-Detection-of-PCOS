@@ -24,10 +24,10 @@ def fillna_median(df: DataFrame) -> DataFrame:
     # utils.py merge_data method needs to recalculate NA columns instead of dropping (TO-DO)
     # process_kaggle_data method process_data fills NA rows with "None"
 
-    #find columns with missing values
+    # find columns with missing values --> fixed outdated multi-dimensional indexing
     for col in df.columns:
-        col_none = df.columns[col == ["None"]].tolist()[1]
-        df.loc[col_none, "None"] = df[col].median()
+        col_none = df[col] == "None"  
+        df.loc[col_none, col] = df[col].median()  
     return df
 
 
@@ -105,4 +105,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-# what's wrong with the heatmap sigh
+# what's wrong with the heatmap again sigh
