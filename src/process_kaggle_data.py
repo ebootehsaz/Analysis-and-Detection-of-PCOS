@@ -1,8 +1,7 @@
 import re
 from pandas import DataFrame
 
-from constants import PCOS_inf_filepath, PCOS_woinf_filepath, \
-PCOS_inf_processed_filepath, PCOS_woinf_processed_filepath, PCOS_merged_processed_filepath
+from constants import PCOS_processed_filepath, PCOS_kaggle_filepath, PCOS_kaggle_filepath_page
 
 from utils import load_data, merge_data, save_data_csv
 
@@ -15,7 +14,8 @@ def process_data(df: DataFrame) -> DataFrame:
     print(f"Duplicates in {df.attrs['file_path']}: {df.duplicated().sum()}")
 
     #Dropping repeated/unnecessary columns
-    df = df.drop(['Unnamed: 44','Sl. No_wo', 'PCOS (Y/N)_wo', '  I   beta-HCG(mIU/mL)_wo','II    beta-HCG(mIU/mL)_wo', 'AMH(ng/mL)_wo'], axis=1, errors='ignore')
+    df = df.drop(['Unnamed: 44', 'Sl. No', 'Patient File No.'], axis=1, errors='ignore')
+    # df = df.drop(['Unnamed: 44','Sl. No_wo', 'PCOS (Y/N)_wo', '  I   beta-HCG(mIU/mL)_wo','II    beta-HCG(mIU/mL)_wo', 'AMH(ng/mL)_wo'], axis=1, errors='ignore')
 
     #Renaming column due to misspelling in original df
     df.rename(columns={'Marraige Status (Yrs)': 'Marriage Status (Yrs)'}, inplace=True, errors='ignore')
@@ -28,6 +28,17 @@ def process_data(df: DataFrame) -> DataFrame:
     # Print out the first 5 missing rows for each column with missing values
     # Find rows with missing data across any column
     rows_with_missing_data = df[df.isnull().any(axis=1)]
+    lst_missing_columns = df.columns[df.isna().any()].tolist()
+
+    print(f"There are a total of {len(rows_with_missing_data)} rows with missing data in {df.attrs['file_path']}.")
+
+    #filling missing values with their median
+    for x in lst_missing_columns:
+        df[x] = df[x].fillna(df[x].median()) #filling columns with missing value with their median
+
+    #Verifying if any missing values are left
+    if not len((df.columns[df.isna().any()].tolist())):
+        print(f"Columns with missing data: {df.columns[df.isna().any()].tolist()}")
 
     # Display the rows with missing data if any
     if not rows_with_missing_data.empty:
@@ -49,20 +60,13 @@ def process_data(df: DataFrame) -> DataFrame:
 
 def main():
     # Load the data
-    PCOS_inf_df = load_data(PCOS_inf_filepath)
-    PCOS_woinf_df = load_data(PCOS_woinf_filepath)
+    PCOS_df = load_data(PCOS_kaggle_filepath)
 
     # Process the data
-    PCOS_inf_df = process_data(PCOS_inf_df)
-    PCOS_woinf_df = process_data(PCOS_woinf_df)
-
-    # Merge the data
-    PCOS_df_merged = merge_data(PCOS_inf_df, PCOS_woinf_df)
+    PCOS_df = process_data(PCOS_df)
 
     # Save the processed data
-    save_data_csv(PCOS_df_merged, PCOS_merged_processed_filepath)
-    save_data_csv(PCOS_woinf_df, PCOS_woinf_processed_filepath) 
-    save_data_csv(PCOS_inf_df, PCOS_inf_processed_filepath)
+    save_data_csv(PCOS_df, PCOS_processed_filepath)
 
 
 if __name__ == '__main__':

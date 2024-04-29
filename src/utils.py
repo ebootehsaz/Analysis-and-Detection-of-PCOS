@@ -5,7 +5,7 @@ from pandas import DataFrame
 
 # This program defines utility functions to load, merge, and save data.
 
-from constants import PCOS_woinf_filepath_page
+from constants import PCOS_kaggle_filepath, PCOS_kaggle_filepath_page
 
 def load_data(filepath: str) -> DataFrame:
     """
@@ -28,7 +28,7 @@ def load_data(filepath: str) -> DataFrame:
         df = pd.read_csv(filepath)
         df.attrs['file_path'] = filepath  # Storing file path as an attribute
     elif filepath.endswith('.xlsx'):
-        sheet_name = PCOS_woinf_filepath_page
+        sheet_name = PCOS_kaggle_filepath_page
         df = pd.read_excel(filepath, sheet_name)
         df.attrs['file_path'] = filepath  # Storing file path as an attribute
     else:

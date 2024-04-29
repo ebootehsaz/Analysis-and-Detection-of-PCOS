@@ -5,7 +5,7 @@ from pandas import DataFrame
 
 from constants import PCOS_inf_filepath, PCOS_woinf_filepath
 
-from utils import load_data, merge_data, save_data_csv
+from utils import load_data, merge_data
 from process_kaggle_data import process_data
 
 # This program contains utility functions to visualize the data

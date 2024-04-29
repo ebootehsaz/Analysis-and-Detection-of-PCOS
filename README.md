@@ -54,6 +54,9 @@ Whenever you add a new library to the project, you can update the requirements.t
 pip freeze > requirements.txt
 ```
 
+## Data Source (Kaggle)
+https://www.kaggle.com/datasets/prasoonkottarathil/polycystic-ovary-syndrome-pcos
+
 ## Navigation
 
 The project is divided into the following directories:
