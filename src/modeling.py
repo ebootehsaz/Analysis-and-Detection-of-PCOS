@@ -35,8 +35,9 @@ def prepare_data(pcos_data: DataFrame, test_size: float = 0.25, scale_data: bool
     features = [
         'Follicle No. (L)', 'Follicle No. (R)', 'Skin darkening (Y/N)',
         'hair growth(Y/N)', 'Weight gain(Y/N)', 'Cycle(R/I)',
-        'Fast food (Y/N)', 'Pimples(Y/N)', 'AMH(ng/mL)', 'Weight (Kg)',
+        'Fast food (Y/N)', 'Pimples(Y/N)', 'Weight (Kg)',
         'BMI', 'Hair loss(Y/N)', 'Cycle length(days)', 'Waist(inch)',
+        # 'AMH(ng/mL)'
         # 'Hip(inch)', 'Age (yrs)',
     ]
     target = 'PCOS (Y/N)'
@@ -143,7 +144,8 @@ def main():
     # Load and prepare the data
     PCOS_df = load_data(PCOS_processed_filepath)
     # X_train, X_test, y_train, y_test = prepare_data(PCOS_df, test_size=0.7)
-    X_train, X_test, y_train, y_test = prepare_data(PCOS_df)
+    X_train, X_test, y_train, y_test = prepare_data(PCOS_df, test_size=0.15)
+    # X_train, X_test, y_train, y_test = prepare_data(PCOS_df)
 
     # Configure the models
     logistic_config = {'params': {'max_iter': 5000, 'solver': 'liblinear'}}
