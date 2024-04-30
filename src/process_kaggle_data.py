@@ -1,11 +1,12 @@
 import re
 from pandas import DataFrame
 
-from constants import PCOS_processed_filepath, PCOS_kaggle_filepath, PCOS_kaggle_filepath_page
+from constants import PCOS_processed_filepath, PCOS_kaggle_filepath
 
-from utils import load_data, merge_data, save_data_csv
+from utils import load_data, save_data_csv
 
 # This program defines utility functions to process and clean data.
+
 
 def process_data(df: DataFrame) -> DataFrame:
     # Checking column names, missing values, duplicates
@@ -13,15 +14,14 @@ def process_data(df: DataFrame) -> DataFrame:
     print(f"Missing values in {df.attrs['file_path']}:\n{df.isnull().sum()}")
     print(f"Duplicates in {df.attrs['file_path']}: {df.duplicated().sum()}")
 
-    #Dropping repeated/unnecessary columns
+    # Dropping repeated/unnecessary columns
     df = df.drop(['Unnamed: 44', 'Sl. No', 'Patient File No.'], axis=1, errors='ignore')
-    # df = df.drop(['Unnamed: 44','Sl. No_wo', 'PCOS (Y/N)_wo', '  I   beta-HCG(mIU/mL)_wo','II    beta-HCG(mIU/mL)_wo', 'AMH(ng/mL)_wo'], axis=1, errors='ignore')
 
-    #Renaming column due to misspelling in original df
+    # Renaming column due to misspelling in original df
     df.rename(columns={'Marraige Status (Yrs)': 'Marriage Status (Yrs)'}, inplace=True, errors='ignore')
 
     # Fix column names - optional
-    df.columns = df.columns.str.strip() # .str.replace(' ', '_').str.lower()
+    df.columns = df.columns.str.strip()  # .str.replace(' ', '_').str.lower()
     df.columns = [re.sub(r'\s+', ' ', col).strip() for col in df.columns]
 
     # Remove leading/trailing whitespaces from the data, remove trailing commas, periods
@@ -36,11 +36,11 @@ def process_data(df: DataFrame) -> DataFrame:
 
     print(f"There are a total of {len(rows_with_missing_data)} rows with missing data in {df.attrs['file_path']}.")
 
-    #filling missing values with their median
+    # filling missing values with their median
     for x in lst_missing_columns:
-        df[x] = df[x].fillna(df[x].median()) #filling columns with missing value with their median
+        df[x] = df[x].fillna(df[x].median())  # filling columns with missing value with their median
 
-    #Verifying if any missing values are left
+    # Verifying if any missing values are left
     if not len((df.columns[df.isna().any()].tolist())):
         print(f"Columns with missing data: {df.columns[df.isna().any()].tolist()}")
 
@@ -50,7 +50,7 @@ def process_data(df: DataFrame) -> DataFrame:
         print(rows_with_missing_data)
     else:
         print("No missing data in any row.")
-    
+
     df = df.fillna('None')
 
     # Drop duplicates
@@ -74,4 +74,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()  
+    main()

@@ -17,16 +17,16 @@ def plot_heatmap(correlation_matrix, title, figsize=(10, 8)):
 def get_correlations(filepath, threshold=0.2):
     # Load the dataset
     df = load_data(filepath)
-    
+
     # Calculate correlations with PCOS (Y/N)
     correlations = df.corr()['PCOS (Y/N)'].sort_values(ascending=False)
 
     significant_correlations = correlations[(correlations.abs() > threshold) & (correlations.index != 'PCOS (Y/N)')]
-    
+
     # Print recommended features based on correlation
     print("Recommended features to use based on correlation with PCOS (Y/N):")
-    print(significant_correlations)    
-    
+    print(significant_correlations)
+
     return df, significant_correlations
 
 

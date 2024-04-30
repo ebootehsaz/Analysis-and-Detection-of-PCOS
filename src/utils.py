@@ -5,7 +5,8 @@ from pandas import DataFrame
 
 # This program defines utility functions to load, merge, and save data.
 
-from constants import PCOS_kaggle_filepath, PCOS_kaggle_filepath_page
+from constants import PCOS_kaggle_filepath_page
+
 
 def load_data(filepath: str) -> DataFrame:
     """
@@ -22,7 +23,6 @@ def load_data(filepath: str) -> DataFrame:
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"File path {filepath} does not exist.")
 
-    
     # They data is either in csv or excel format
     if filepath.endswith('.csv'):
         df = pd.read_csv(filepath)
@@ -33,8 +33,9 @@ def load_data(filepath: str) -> DataFrame:
         df.attrs['file_path'] = filepath  # Storing file path as an attribute
     else:
         raise ValueError(f"File path {filepath} is not a csv or excel file.")
-    
+
     return df
+
 
 def merge_data(df1: DataFrame, df2: DataFrame) -> DataFrame:
     """
@@ -54,7 +55,8 @@ def merge_data(df1: DataFrame, df2: DataFrame) -> DataFrame:
 
     return df
 
-def save_data_csv(df:DataFrame , fp: str):
+
+def save_data_csv(df: DataFrame, fp: str):
     """
     Save the data to a csv file.
     Args:
@@ -74,7 +76,8 @@ def save_data_csv(df:DataFrame , fp: str):
         print(f"Data saved to {fp}")
     except Exception as e:
         try:
-            # remove ../ from the start of filepath 
+            print(f"Error saving the data to {fp}. Error: {str(e)}")
+            # remove ../ from the start of filepath
             fp = re.sub(r'\.\./', '', fp)
             if os.path.exists(fp):
                 overwrite = input(f"File path {fp} already exists. Do you want to overwrite it? (y/n): ")

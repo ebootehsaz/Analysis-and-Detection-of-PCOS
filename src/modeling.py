@@ -2,9 +2,8 @@ from pandas import DataFrame
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
-import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
@@ -14,6 +13,7 @@ import seaborn as sns
 
 from constants import PCOS_processed_filepath
 from utils import load_data
+
 
 def prepare_data(pcos_data: DataFrame, test_size: float = 0.25, scale_data: bool = True):
     """
@@ -27,9 +27,12 @@ def prepare_data(pcos_data: DataFrame, test_size: float = 0.25, scale_data: bool
     #     'BMI', #'Age (yrs)', 'Pulse rate(bpm)',
     #     'Follicle No. (L)', 'Follicle No. (R)', 'Avg. F size (L) (mm)',
     #     'Avg. F size (R) (mm)', 'Endometrium (mm)', 'Fast food (Y/N)',
-    #     'Hb(g/dl)', 'Cycle(R/I)', 'Cycle length(days)', 'No. of aborptions', 'I beta-HCG(mIU/mL)', 'II beta-HCG(mIU/mL)', 'FSH(mIU/mL)',
-    #     'LH(mIU/mL)', 'FSH/LH', 'Hip(inch)', 'Waist(inch)', 'Waist:Hip Ratio', 'TSH (mIU/L)', 'AMH(ng/mL)', 'PRL(ng/mL)',
-    #     'Vit D3 (ng/mL)', 'PRG(ng/mL)', 'RBS(mg/dl)', 'Weight gain(Y/N)', 'hair growth(Y/N)', 'Skin darkening (Y/N)', 'Hair loss(Y/N)', 
+    #     'Hb(g/dl)', 'Cycle(R/I)', 'Cycle length(days)', 'No. of aborptions',
+    #     'I beta-HCG(mIU/mL)', 'II beta-HCG(mIU/mL)', 'FSH(mIU/mL)',
+    #     'LH(mIU/mL)', 'FSH/LH', 'Hip(inch)', 'Waist(inch)', 'Waist:Hip Ratio',
+    #     'TSH (mIU/L)', 'AMH(ng/mL)', 'PRL(ng/mL)',
+    #     'Vit D3 (ng/mL)', 'PRG(ng/mL)', 'RBS(mg/dl)', 'Weight gain(Y/N)',
+    #     'hair growth(Y/N)', 'Skin darkening (Y/N)', 'Hair loss(Y/N)',
     #     'Pimples(Y/N)', 'Reg.Exercise(Y/N)',
     # ]
     features = [
@@ -64,7 +67,7 @@ def prepare_data(pcos_data: DataFrame, test_size: float = 0.25, scale_data: bool
 def train_logistic_model(X_train, y_train, config={}):
     """
     Train various models based on specified parameters and configurations.
-    
+
     :param X_train: Training features.
     :param y_train: Training target variable.
     :param config: Dictionary containing model-specific configurations.
@@ -76,6 +79,7 @@ def train_logistic_model(X_train, y_train, config={}):
     model = LogisticRegression(**params)
     model.fit(X_train, y_train)
     return model
+
 
 def train_neural_network(X_train, y_train):
     # Define the model architecture
@@ -105,11 +109,11 @@ def train_neural_network(X_train, y_train):
 
 def evaluate_model(model, X_test, y_test, model_type='logistic', metrics=['accuracy', 'report', 'confusion_matrix']):
     results = {}
-    
+
     if model_type == 'logistic':
         # Predictions for Logistic Regression
         y_pred = model.predict(X_test)
-        
+
         # Evaluating metrics
         if 'accuracy' in metrics:
             results['accuracy'] = accuracy_score(y_test, y_pred)
@@ -117,18 +121,18 @@ def evaluate_model(model, X_test, y_test, model_type='logistic', metrics=['accur
             results['classification_report'] = classification_report(y_test, y_pred)
         if 'confusion_matrix' in metrics:
             results['confusion_matrix'] = confusion_matrix(y_test, y_pred)
-        
+
     elif model_type == 'neural_network':
         # Get predictions from the model, which are probabilities for neural networks
         y_pred_prob = model.predict(X_test)
         y_pred = (y_pred_prob > 0.5).astype(int)  # Convert probabilities to 0 or 1 for binary classification
-        
+
         # Ensure y_test is in the correct format
         if len(y_test.shape) == 1 or y_test.shape[1] == 1:  # Checks if y_test is not one-hot encoded
             y_test_cat = y_test
         else:  # if y_test is one-hot encoded, convert it back to binary labels
             y_test_cat = np.argmax(y_test, axis=1)
-        
+
         # Evaluating metrics
         if 'accuracy' in metrics:
             results['accuracy'] = accuracy_score(y_test_cat, y_pred)
@@ -149,13 +153,14 @@ def main():
 
     # Configure the models
     logistic_config = {'params': {'max_iter': 5000, 'solver': 'liblinear'}}
-    
+
     # Train models
     logistic_model = train_logistic_model(X_train, y_train, logistic_config)
     nn_model = train_neural_network(X_train, y_train)
 
     # Evaluate models
-    logistic_results = evaluate_model(logistic_model, X_test, y_test, 'logistic', metrics=['accuracy', 'report', 'confusion_matrix'])
+    logistic_results = evaluate_model(logistic_model, X_test, y_test, 'logistic',
+                                      metrics=['accuracy', 'report', 'confusion_matrix'])
     nn_results = evaluate_model(nn_model, X_test, y_test, 'neural_network', metrics=['accuracy'])
 
     # Output results
@@ -164,13 +169,15 @@ def main():
     pretty_print_results("Logistic Regression", logistic_results)
     pretty_print_results("Neural Network", nn_results)
 
+
 def pretty_print_results(title, results):
     print(f"{title} Results:", end='')
     for key, value in results.items():
         print(f"\n{key.capitalize()}:")
         if key == 'confusion_matrix':
-            plt.figure(figsize=(8,6))
-            sns.heatmap(value, annot=True, fmt="d", cmap='Blues', xticklabels=['Non-PCOS', 'PCOS'], yticklabels=['Non-PCOS', 'PCOS'])
+            plt.figure(figsize=(8, 6))
+            sns.heatmap(value, annot=True, fmt="d", cmap='Blues', xticklabels=[
+                        'Non-PCOS', 'PCOS'], yticklabels=['Non-PCOS', 'PCOS'])
             plt.xlabel('Predicted')
             plt.ylabel('True')
             plt.title('Confusion Matrix for Logistic Regression')
@@ -186,12 +193,13 @@ def pretty_print_results(title, results):
             if value.ndim == 1:  # It's a single-dimensional array, likely a vector of predictions or similar.
                 print(", ".join([f"{x:.4f}" for x in value]))
             else:
-                # For multi-dimensional arrays, you might want to handle this more carefully, maybe print shape or similar
+                # For multi-dimensional arrays, you might want to handle this more carefully
                 print("Array Shape:", value.shape)
         else:
             # Fallback for any other types of data
             print(value)
     print("\n")  # Add a newline for better separation of results
+
 
 if __name__ == '__main__':
     main()

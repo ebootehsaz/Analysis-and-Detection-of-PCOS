@@ -10,17 +10,18 @@ from process_kaggle_data import process_data
 
 # This program contains utility functions to visualize the data
 
+
 def visualize_and_remove_outliers(df: DataFrame, column: str):
     sns.boxplot(x=df[column])
     plt.title(f'Boxplot of {column} before outlier removal')
     plt.show()
-    
+
     Q1 = df[column].quantile(0.25)
     Q3 = df[column].quantile(0.75)
     IQR = Q3 - Q1
     lower_bound = Q1 - 1.5 * IQR
     upper_bound = Q3 + 1.5 * IQR
-    
+
     df_filtered = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
     sns.boxplot(x=df_filtered[column])
     plt.title(f'Boxplot of {column} after outlier removal')
@@ -66,7 +67,7 @@ def display_data(df: DataFrame):
     plt.show()
 
 
-def display_data(df: DataFrame):
+def display_data2(df: DataFrame):
     """
     Generate tables/graphs to display the data.
     """
@@ -102,24 +103,6 @@ def display_data(df: DataFrame):
     sns.pairplot(df)
     plt.title("Relationship between columns")
     plt.show()
-
-
-def visualize_and_remove_outliers(df: DataFrame, column: str):
-    sns.boxplot(x=df[column])
-    plt.title(f'Boxplot of {column} before outlier removal')
-    plt.show()
-
-    Q1 = df[column].quantile(0.25)
-    Q3 = df[column].quantile(0.75)
-    IQR = Q3 - Q1
-    lower_bound = Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
-
-    df_filtered = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
-    sns.boxplot(x=df_filtered[column])
-    plt.title(f'Boxplot of {column} after outlier removal')
-    plt.show()
-    return df_filtered
 
 
 def convert_to_numeric(df, column_names):
@@ -150,7 +133,7 @@ def main():
         df = convert_to_numeric(df, numeric_columns)
         for column in numeric_columns:
             df = visualize_and_remove_outliers(df, column)
-        
+
         new_size = df.shape[0]
         rows_removed = original_size - new_size
         percentage_removed = (rows_removed / original_size) * 100
@@ -175,14 +158,13 @@ def main():
         print(f"Number of rows removed due to outliers in {name}: {rows_removed}")
         print(f"Percentage of data removed due to outliers in {name}: {percentage_removed:.2f}%")
 
-
     # Merge the data
     PCOS_df_merged = merge_data(PCOS_inf_df, PCOS_woinf_df)
     original_merged_size = PCOS_df_merged.shape[0]
 
     # Convert specified columns to numeric in the merged dataset
     PCOS_df_merged = convert_to_numeric(PCOS_df_merged, numeric_columns)
-    
+
     # Visualize and remove outliers for the merged dataset
     for column in numeric_columns:
         PCOS_df_merged = visualize_and_remove_outliers(PCOS_df_merged, column)
@@ -208,8 +190,9 @@ def main():
     # display_data(PCOS_df_merged)
     display_data(PCOS_woinf_df)
     display_data(PCOS_inf_df)
+    display_data2(PCOS_inf_df)
     display_data(PCOS_df_merged)
 
 
 if __name__ == '__main__':
-    main()  
+    main()
