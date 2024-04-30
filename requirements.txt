@@ -5,3 +5,4 @@ openpyxl
 flake8
 scikit-learn
 tensorflow
+statsmodels
