@@ -44,7 +44,24 @@ def explore_data_single_correlation(significant_correlations):
     significant_correlations_df = pd.DataFrame(significant_correlations)
     plot_heatmap(significant_correlations_df, 'Significant Correlation with PCOS (Y/N)', figsize=(4, 8))
 
+
+def plot_follicle_vs_pcos(df):
+    # Calculate the mean Follicle No. (R) for each PCOS category
+    mean_follicles = df.groupby('PCOS (Y/N)')['Follicle No. (R)'].mean()
+
+    # Plotting the results as a bar chart
+    plt.figure(figsize=(8, 6))
+    sns.barplot(x=mean_follicles.index, y=mean_follicles.values)
+    plt.title('Average Follicle No. (R) by PCOS Status')
+    plt.xlabel('PCOS Diagnosis')
+    plt.ylabel('Average Follicle No. (R)')
+    plt.xticks(ticks=[0, 1], labels=['No PCOS', 'PCOS'])  # Set custom labels for clarity
+    plt.grid(True)
+    plt.show()
+
+
 if __name__ == '__main__':
     df, significant_correlations = get_correlations(PCOS_processed_filepath)
-    explore_data(df, significant_correlations)
-    explore_data_single_correlation(significant_correlations)
+    # explore_data(df, significant_correlations)
+    # explore_data_single_correlation(significant_correlations)
+    plot_follicle_vs_pcos(df)
