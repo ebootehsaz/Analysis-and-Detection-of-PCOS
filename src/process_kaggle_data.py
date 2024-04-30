@@ -24,6 +24,10 @@ def process_data(df: DataFrame) -> DataFrame:
     df.columns = df.columns.str.strip() # .str.replace(' ', '_').str.lower()
     df.columns = [re.sub(r'\s+', ' ', col).strip() for col in df.columns]
 
+    # Remove leading/trailing whitespaces from the data, remove trailing commas, periods
+    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    df = df.applymap(lambda x: x.rstrip('.') if isinstance(x, str) else x)
+
     # Fix missing values
     # Print out the first 5 missing rows for each column with missing values
     # Find rows with missing data across any column
